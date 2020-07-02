@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+    <script src="main.js"></script>
+    <script>
+      var g = {};
+      const ginit = () => {
+        [...document.querySelectorAll('*')]
+          .filter((e) => e.id != '')
+          .forEach((e) => {
+            g[e.id] = e;
+          });
+        Object.entries({
+          random: () => {
+            g.number.value = randomBits(g.bits.value);
+          },
+        }).forEach((e) => {
+          g[e[0]].onclick = e[1];
+        });
+      };
+    </script>
+  </head>
+  <body onload="ginit()">
+    <h1>RSA Calculator</h1>
+    <h2>0. Generate prime numbers</h2>
+    bits: <input type="number" name="bits" id="bits" value="16" /><br />
+    number: <input type="number" name="number" id="number" /><br />
+    <button id="random">Generate random number</button><br />
+    <button id="if_prime">Check if it's prime</button>
+    <span id="number_prime" class="hidden">It is a prime number!</span>
+    <span id="number_not_prime" class="hidden">It is NOT a prime number!</span
+    ><br />
+    <button id="gen_prime">Generate random prime</button><br />
+    <button id="gen_next_prime">Generate next random prime</button><br />
+  </body>
+</html>

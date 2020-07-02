@@ -1,4 +1,4 @@
-function randomByte() {
+function randomBit() {
   // the randomness isn't meant to be secure
   // TODO: use crypto webapi
   return BigInt(Math.random() < 0.5);
