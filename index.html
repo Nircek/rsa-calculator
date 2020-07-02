@@ -4,29 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <style>
-      .hidden {
-        display: none;
-      }
-    </style>
-    <script src="main.js"></script>
-    <script>
-      var g = {};
-      const ginit = () => {
-        [...document.querySelectorAll('*')]
-          .filter((e) => e.id != '')
-          .forEach((e) => {
-            g[e.id] = e;
-          });
-        Object.entries({
-          random: () => {
-            g.number.value = randomBits(g.bits.value);
-          },
-        }).forEach((e) => {
-          g[e[0]].onclick = e[1];
-        });
-      };
-    </script>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/big-integer/1.6.48/BigInteger.min.js" integrity="sha512-ay3xvb1ky46pn2TD5cKikHiWLSakjf/rrwL7p5YYsC94WnMd3NlG4+ybWqu9Q8GbWiDun+grI45fMa7RO1m5Xg==" crossorigin="anonymous"></script>
+    <script src="rsa.js"></script>
+    <script src="site.js"></script>
   </head>
   <body onload="ginit()">
     <h1>RSA Calculator</h1>
