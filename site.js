@@ -14,9 +14,13 @@ const ginit = () => {
     arr[0].classList.add('hidden');
     arr[1].classList.remove('hidden');
   };
+  const gen_prime = () => {
+    g.number.value = randomPrime(g.bits.value);
+  };
   Object.entries({
     random: random,
     if_prime: if_prime,
+    gen_prime: gen_prime,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });
