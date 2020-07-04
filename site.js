@@ -17,10 +17,18 @@ const ginit = () => {
   const gen_prime = () => {
     g.number.value = randomPrime(g.bits.value);
   };
+  const atop = () => {
+    g.p.value = g.number.value;
+  };
+  const atoq = () => {
+    g.q.value = g.number.value;
+  };
   Object.entries({
     random: random,
     if_prime: if_prime,
     gen_prime: gen_prime,
+    atop: atop,
+    atoq: atoq,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });
