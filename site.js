@@ -23,12 +23,20 @@ const ginit = () => {
   const atoq = () => {
     g.q.value = g.number.value;
   };
+  const calc_n = () => {
+    g.n.value = bigInt(g.p.value).times(g.p.value);
+  };
+  const calc_phi = () => {
+    g.phi.value = bigInt(g.p.value).minus(1).times(bigInt(g.q.value).minus(1));
+  };
   Object.entries({
     random: random,
     if_prime: if_prime,
     gen_prime: gen_prime,
     atop: atop,
     atoq: atoq,
+    calc_n: calc_n,
+    calc_phi: calc_phi,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });

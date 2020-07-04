@@ -12,8 +12,8 @@
   <body onload="ginit()">
     <h1>RSA Calculator</h1>
     <h2>0. Generate prime numbers</h2>
-    bits: <input type="number" name="bits" id="bits" value="16" /><br />
-    a = <input type="number" name="number" id="number" /><br />
+    bits: <input name="bits" id="bits" value="16" /><br />
+    a = <input name="number" id="number" /><br />
     <button id="random">Generate random number</button><br />
     <button id="if_prime">Check if it's prime</button>
     <span id="number_prime" class="hidden">It is a prime number!</span>
@@ -22,9 +22,14 @@
     <button id="gen_prime">Generate random prime</button><br />
     <!-- <button id="gen_next_prime">Generate next random prime</button><br /> -->
     <h2>1. Pick p and q</h2>
-    &#8473; &ni; p = <input type="number" name="p" id="p" /><br />
+    &#8473; &ni; p = <input name="p" id="p" /><br />
     <button id="atop">a &rarr; p</button><br />
-    &#8473; &ni; q = <input type="number" name="q" id="q" /><br />
+    &#8473; &ni; q = <input name="q" id="q" /><br />
     <button id="atoq">a &rarr; q</button><br />
+    <h2>2. Calculate n and &phi;(n)</h2>
+    n = p &times; q = <input name="n" id="n" /><br />
+    <button id="calc_n">Calculate n</button><br />
+    &phi;(n) = ( p - 1 ) ( q - 1 ) = <input name="phi" id="phi" /><br />
+    <button id="calc_phi">Calculate &phi;(n)</button><br />
   </body>
 </html>
