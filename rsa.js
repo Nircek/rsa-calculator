@@ -19,4 +19,13 @@ const randomPrime = (bits) => {
   while (!x.isProbablePrime());
   return x;
 };
-const bits = (n) => n.toString(2).length;
+const bits = (n) => bigInt(n).toString(2).length;
+const calculateK = (phi, e, cb = (_, __, ___) => null) => {
+  for (let k = 0, last = 0; k == 1 || last != 1; ++k) {
+    let full = bigInt(phi).times(k).plus(1);
+    last = full.mod(e);
+    cb(k, full, last);
+    if (last == 0) return k;
+  }
+  return null;
+};

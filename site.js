@@ -1,4 +1,21 @@
 var g = {};
+function getTXTFile(url) {
+  return new Promise((r) => {
+    let h = new XMLHttpRequest();
+    h.open('GET', url);
+    h.onreadystatechange = () => {
+      if (h.readyState === 4)
+        if (h.status === 200 || h.status == 0) {
+          r(h.responseText);
+        }
+    };
+    h.send(null);
+  });
+}
+var small_primes;
+getTXTFile('small-primes.txt').then((s) => {
+  small_primes = s.split(', ');
+});
 const ginit = () => {
   [...document.querySelectorAll('*')]
     .filter((e) => e.id != '')
@@ -37,21 +54,33 @@ const ginit = () => {
   const calc_k = () => {
     let tbody = document.querySelectorAll('#k_table > tbody')[0];
     tbody.innerHTML = '';
-    for (let k = 0, last = 0; k == 1 || last != 1; ++k) {
-      let tr = document.createElement('tr');
-      tbody.appendChild(tr);
-      add_td(tr, k);
-      last = bigInt(g.phi.value).times(k).plus(1);
-      add_td(tr, last);
-      last = last.mod(g.e.value);
-      add_td(tr, last);
-      if (last == 0) {
-        g.k.value = k;
-        return;
-      }
-    }
-    g.k.value = 'gcd(\u03c6(n),e)\u22601';
+    if (
+      (g.k.value = calculateK(g.phi.value, g.e.value, (k, f, m) => {
+        let tr = document.createElement('tr');
+        tbody.appendChild(tr);
+        [k, f, m].forEach((e) => add_td(tr, e));
+      })) == null
+    )
+      g.k.value = 'gcd(\u03c6(n),e)\u22601';
   };
+  Array.prototype.min = function () {
+    return this.reduce((b, e) => (b > e && e != null ? e : b));
+  };
+  const calc_e = (strong = false) => {
+    g.e.value =
+      small_primes === undefined
+        ? 'primes not found (check your internet connection)'
+        : small_primes.slice(0, (bits(g.n.value) * 6542) / 1024).reduce(
+            (b, e) => {
+              b[0]++;
+              if (b[2] == 1) return b;
+              let k = calculateK(g.phi.value, e);
+              return b[2] > k && k != null ? [b[0], b[0], k, e] : b;
+            },
+            [-1, null, Infinity, 'error']
+          )[3];
+  };
+  const calc_e_strong = () => calc_e(true);
   Object.entries({
     random: random,
     if_prime: if_prime,
@@ -61,6 +90,8 @@ const ginit = () => {
     calc_n: calc_n,
     calc_phi: calc_phi,
     calc_k: calc_k,
+    calc_e: calc_e,
+    calc_e_strong: calc_e_strong,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });
