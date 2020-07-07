@@ -6,3 +6,17 @@ button {
 .hidden {
   display: none;
 }
+table {
+  border: none;
+  border-collapse: collapse;
+}
+table thead {
+  border: 1px solid #000;
+}
+table td,
+table th {
+  padding: 1em;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  text-align: center;
+}
