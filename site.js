@@ -86,6 +86,14 @@ const ginit = () => {
   const hide_table = () => {
     g.k_table.className = g.k_table.className ? '' : 'hidden';
   };
+
+  const calc_d = () => {
+    let ed = bigInt(g.k.value).times(g.phi.value).plus(1);
+    g.d.value =
+      ed.mod(g.e.value).toString() == 0
+        ? ed.divide(g.e.value)
+        : '(k\u00d7\u03c6(n)+1)\u2224e';
+  };
   Object.entries({
     random: random,
     if_prime: if_prime,
@@ -98,6 +106,7 @@ const ginit = () => {
     calc_e: calc_e,
     calc_e_k: () => calc_e(null, g.k.value),
     hide_table: hide_table,
+    calc_d: calc_d,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });
