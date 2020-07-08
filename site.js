@@ -94,6 +94,14 @@ const ginit = () => {
         ? ed.divide(g.e.value)
         : '(k\u00d7\u03c6(n)+1)\u2224e';
   };
+  const gen = () => {
+    g.pub.innerText = `RSA ${bits(g.n.value)} bits public key\nn=${
+      g.n.value
+    }\ne=${g.e.value}`;
+    g.sec.innerText = `RSA ${bits(g.n.value)} bits private key\nn=${
+      g.n.value
+    }\nd=${g.d.value}`;
+  };
   Object.entries({
     random: random,
     if_prime: if_prime,
@@ -107,6 +115,7 @@ const ginit = () => {
     calc_e_k: () => calc_e(null, g.k.value),
     hide_table: hide_table,
     calc_d: calc_d,
+    gen: gen,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });
