@@ -83,6 +83,9 @@ const ginit = () => {
     if (g.e.value != 'error') g.k.value = calc[2];
     g.e.value = calc[3];
   };
+  const hide_table = () => {
+    g.k_table.className = g.k_table.className ? '' : 'hidden';
+  };
   Object.entries({
     random: random,
     if_prime: if_prime,
@@ -94,6 +97,7 @@ const ginit = () => {
     calc_k: calc_k,
     calc_e: calc_e,
     calc_e_k: () => calc_e(null, g.k.value),
+    hide_table: hide_table,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });

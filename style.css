@@ -7,7 +7,7 @@ button {
   display: none;
 }
 table {
-  border: none;
+  border-bottom: 1px solid #000;
   border-collapse: collapse;
 }
 table thead {
