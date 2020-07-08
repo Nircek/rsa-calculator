@@ -66,21 +66,23 @@ const ginit = () => {
   Array.prototype.min = function () {
     return this.reduce((b, e) => (b > e && e != null ? e : b));
   };
-  const calc_e = (strong = false) => {
-    g.e.value =
-      small_primes === undefined
-        ? 'primes not found (check your internet connection)'
-        : small_primes.slice(0, (bits(g.n.value) * 6542) / 1024).reduce(
-            (b, e) => {
-              b[0]++;
-              if (b[2] == 1) return b;
-              let k = calculateK(g.phi.value, e);
-              return b[2] > k && k != null ? [b[0], b[0], k, e] : b;
-            },
-            [-1, null, Infinity, 'error']
-          )[3];
+  const calc_e = (_ = null, K = null) => {
+    if (small_primes === undefined)
+      g.e.value = 'primes not found (check your internet connection)';
+    let calc = small_primes.slice(0, (bits(g.n.value) * 6542) / 1024).reduce(
+      (b, e) => {
+        b[0]++;
+        if ((K == null && b[2] == 1) || (K != null && b[2] == K)) return b;
+        let k = calculateK(g.phi.value, e);
+        return (K == null ? b[2] > k : k == K) && k != null
+          ? [b[0], b[0], k, e]
+          : b;
+      },
+      [-1, null, Infinity, 'error']
+    );
+    if (g.e.value != 'error') g.k.value = calc[2];
+    g.e.value = calc[3];
   };
-  const calc_e_strong = () => calc_e(true);
   Object.entries({
     random: random,
     if_prime: if_prime,
@@ -91,7 +93,7 @@ const ginit = () => {
     calc_phi: calc_phi,
     calc_k: calc_k,
     calc_e: calc_e,
-    calc_e_strong: calc_e_strong,
+    calc_e_k: () => calc_e(null, g.k.value),
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });
