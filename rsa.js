@@ -29,3 +29,20 @@ const calculateK = (phi, e, cb = (_, __, ___) => null) => {
   }
   return null;
 };
+
+const utf2int = (s) => {
+  s = unescape(encodeURIComponent(s));
+  let r = bigInt.zero;
+  for (let i = 0; i < s.length; ++i) r = r.shiftLeft(8).or(s.charCodeAt(i));
+  return r;
+};
+
+const int2utf = (i) => {
+  i = bigInt(i);
+  let r = '';
+  while (!i.isZero()) {
+    r = String.fromCharCode(i.and(0xff)) + r;
+    i = i.shiftRight(8);
+  }
+  return decodeURIComponent(escape(r));
+};

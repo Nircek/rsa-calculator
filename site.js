@@ -41,7 +41,7 @@ const ginit = () => {
     g.q.value = g.number.value;
   };
   const calc_n = () => {
-    g.n.value = bigInt(g.p.value).times(g.p.value);
+    g.n.value = bigInt(g.p.value).times(g.q.value);
   };
   const calc_phi = () => {
     g.phi.value = bigInt(g.p.value).minus(1).times(bigInt(g.q.value).minus(1));
@@ -95,13 +95,37 @@ const ginit = () => {
         : '(k\u00d7\u03c6(n)+1)\u2224e';
   };
   const gen = () => {
-    g.pub.innerText = `RSA ${bits(g.n.value)} bits public key\nn=${
-      g.n.value
-    }\ne=${g.e.value}`;
-    g.sec.innerText = `RSA ${bits(g.n.value)} bits private key\nn=${
-      g.n.value
-    }\nd=${g.d.value}`;
+    if (
+      bigInt[100]
+        .modPow(bigInt(g.e.value).times(g.d.value), g.n.value)
+        .minus(100)
+        .isZero()
+    ) {
+      g.pub.innerText = `RSA public key\nn=${g.n.value}\ne=${g.e.value}\n${bits(
+        g.n.value
+      )} bits`;
+      g.sec.innerText = `RSA private key\nn=${g.n.value}\nd=${g.d.value}\n${bits(
+        g.n.value
+      )} bits`;
+    }
+    else { 
+      g.sec.innerText = g.pub.innerText = 'e\u00d7d\u22621';
+    }
   };
+
+  const ttom = () => {
+    g.m.value = utf2int(g.text.value);
+  };
+  const mtot = () => {
+    g.text.value = int2utf(g.m.value);
+  };
+  const encrypt = () => {
+    g.c.value = bigInt(g.m.value).modPow(g.e.value, g.n.value);
+  };
+  const decrypt = () => {
+    g.m.value = bigInt(g.c.value).modPow(g.d.value, g.n.value);
+  };
+
   Object.entries({
     random: random,
     if_prime: if_prime,
@@ -116,6 +140,10 @@ const ginit = () => {
     hide_table: hide_table,
     calc_d: calc_d,
     gen: gen,
+    ttom: ttom,
+    mtot: mtot,
+    encrypt: encrypt,
+    decrypt: decrypt,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });

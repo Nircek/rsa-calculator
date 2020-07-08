@@ -50,15 +50,30 @@
         <td>1</td>
       </tbody>
     </table>
-    <br>
+    <br />
     d = ( k &times; &phi;(n) + 1 ) &div; e = <input name="d" id="d" /><br />
     <button id="calc_d">Calculate d</button><br />
     <h2>4. Send your public key, store and keep secret your private key</h2>
     <button id="gen">Generate</button>
     <h3>Public key</h3>
-    <pre id="pub">
-    </pre>
+    <pre id="pub"></pre>
     <h3>Private key</h3>
     <pre id="sec"></pre>
+    <h2>5. Encrypt/decrypt your data</h2>
+    <h3>Text</h3>
+    <br />
+    <textarea name="text" id="text" cols="30" rows="10"></textarea><br /><br />
+    <button id="ttom">Convert text to number</button><br />
+    Encoding: utf-8 <-> number<br />
+    <button id="mtot">Convert number to text</button><br /><br />
+    <h3>Number</h3>
+    <br />
+    m = <input name="m" id="m" /><br />
+    <br />
+    <br />
+    <button id="encrypt">Encrypt/verify</button><br />
+    <button id="decrypt">Decrypt/sign</button><br /><br />
+    <h3>Cipher</h3>
+    c = <input name="c" id="c" />
   </body>
 </html>

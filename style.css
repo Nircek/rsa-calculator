@@ -1,6 +1,6 @@
 body,
 input,
-button {
+button, textarea {
   background-color: #aaa;
 }
 .hidden {
@@ -19,4 +19,8 @@ table th {
   border-left: 1px solid #000;
   border-right: 1px solid #000;
   text-align: center;
+}
+
+pre {
+  overflow-x: auto;
 }
