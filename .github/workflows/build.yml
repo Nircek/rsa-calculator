@@ -1,0 +1,22 @@
+name: GitHub Pages
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: jetli/wasm-pack-action@v0.4.0
+            - uses: Swatinem/rust-cache@v2
+            - name: build wasm
+              run: |
+                  wasm-pack build --target web
+                  rm pkg/.gitignore
+            - uses: JamesIves/github-pages-deploy-action@v4
+              with:
+                  folder: .
+        permissions:
+            contents: write # see https://github.com/JamesIves/github-pages-deploy-action/issues/1285#issuecomment-1383004519

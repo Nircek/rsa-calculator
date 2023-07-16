@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script type="module">
+        import wasm, { greet, state } from "./pkg/rsa_calculator.js";
+        async function init_and_get_state() {
+            try {
+                await wasm();
+                return state();
+            } catch (e) {
+                return `FAILED (${e})`;
+            }
+        }
+        document.querySelector('#wasm-state').innerText = await init_and_get_state();
+        document.querySelector('button').addEventListener('click', greet);
+    </script>
+    <p id="wasm-state">NOT LOADED</p>
+    <button>Greet!</button>
+</body>
+
+</html>
