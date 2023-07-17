@@ -1,3 +1,6 @@
+import {
+  randomNumber, randomPrime, bits, calculateK, utf2int, int2utf, isProbablyPrime, powmod
+} from "./rsa.js";
 var g = {};
 function getTXTFile(url) {
   return new Promise((r) => {
@@ -16,7 +19,7 @@ var small_primes;
 getTXTFile('small-primes.txt').then((s) => {
   small_primes = s.split(', ');
 });
-const ginit = () => {
+window.ginit = () => {
   [...document.querySelectorAll('*')]
     .filter((e) => e.id != '')
     .forEach((e) => {
@@ -25,14 +28,14 @@ const ginit = () => {
   const random = () => {
     g.number.value = randomNumber(g.bits.value);
   };
-  const if_prime = () => {
+  const if_prime = async () => {
     let arr = [g.number_prime, g.number_not_prime];
-    if (bigInt(g.number.value).isProbablePrime()) arr.reverse();
+    if (await isProbablyPrime(BigInt(g.number.value))) arr.reverse();
     arr[0].classList.add('hidden');
     arr[1].classList.remove('hidden');
   };
-  const gen_prime = () => {
-    g.number.value = randomPrime(g.bits.value);
+  const gen_prime = async () => {
+    g.number.value = await randomPrime(g.bits.value);
   };
   const atop = () => {
     g.p.value = g.number.value;
@@ -41,10 +44,10 @@ const ginit = () => {
     g.q.value = g.number.value;
   };
   const calc_n = () => {
-    g.n.value = bigInt(g.p.value).times(g.q.value);
+    g.n.value = BigInt(g.p.value) * BigInt(g.q.value);
   };
   const calc_phi = () => {
-    g.phi.value = bigInt(g.p.value).minus(1).times(bigInt(g.q.value).minus(1));
+    g.phi.value = (BigInt(g.p.value) - 1n) * (BigInt(g.q.value) - 1n);
   };
   const add_td = (tr, text) => {
     let td = document.createElement('td');
@@ -88,18 +91,15 @@ const ginit = () => {
   };
 
   const calc_d = () => {
-    let ed = bigInt(g.k.value).times(g.phi.value).plus(1);
+    let ed = BigInt(g.k.value) * BigInt(g.phi.value) + 1n;
     g.d.value =
-      ed.mod(g.e.value).toString() == 0
-        ? ed.divide(g.e.value)
+      ed % BigInt(g.e.value) == 0
+        ? ed / BigInt(g.e.value)
         : '(k\u00d7\u03c6(n)+1)\u2224e';
   };
   const gen = () => {
     if (
-      bigInt[100]
-        .modPow(bigInt(g.e.value).times(g.d.value), g.n.value)
-        .minus(100)
-        .isZero()
+      powmod(100n, BigInt(g.e.value) * BigInt(g.d.value), BigInt(g.n.value)) == 100n
     ) {
       g.pub.innerText = `RSA public key\nn=${g.n.value}\ne=${g.e.value}\n${bits(
         g.n.value
@@ -108,8 +108,8 @@ const ginit = () => {
         g.n.value
       )} bits`;
     }
-    else { 
-      g.sec.innerText = g.pub.innerText = 'e\u00d7d\u22621';
+    else {
+      g.sec.innerText = g.pub.innerText = 'e\u00d7d\u22621 \u2228 p\u2209\u2119 \u2228 q\u2209\u2119';
     }
   };
 
@@ -120,10 +120,12 @@ const ginit = () => {
     g.text.value = int2utf(g.m.value);
   };
   const encrypt = () => {
-    g.c.value = bigInt(g.m.value).modPow(g.e.value, g.n.value);
+    g.c.value = BigInt(g.m.value) < BigInt(g.n.value) ?
+      powmod(g.m.value, g.e.value, g.n.value) :
+      `m \u2265 n -- m > 2^${bits(g.m.value) - 1}`;
   };
   const decrypt = () => {
-    g.m.value = bigInt(g.c.value).modPow(g.d.value, g.n.value);
+    g.m.value = powmod(g.c.value, g.d.value, g.n.value);
   };
 
   Object.entries({
