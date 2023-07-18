@@ -30,28 +30,13 @@
     &phi;(n) = ( p - 1 ) ( q - 1 ) = <input name="phi" id="phi" /><br />
     <button id="calc_phi">Calculate &phi;(n)</button><br />
     <h2>3. Pick e and d</h2>
-    e = <input name="e" id="e" /><br />
-    <button id="calc_e">Find nice e</button><br />
-    <button id="calc_e_k">Find e with k</button><br />
-    k = <input name="k" id="k" /><br />
-    <button id="calc_k">Calculate k</button><br /><br />
-    <button id="hide_table">Hide/show table</button><br />
-    <table id="k_table">
-      <thead>
-        <th>k</th>
-        <th>k &times; &phi;(n) + 1</th>
-        <th>k &times; &phi;(n) + 1 mod e</th>
-      </thead>
-      <tbody>
-        <td>0</td>
-        <td>1</td>
-        <td>1</td>
-      </tbody>
-    </table>
-    <br />
-    d = ( k &times; &phi;(n) + 1 ) &div; e = <input name="d" id="d" /><br />
+    e = <input name="e" id="e" value="65537"/><br />
+    <!-- https://crypto.stackexchange.com/a/3113 -->
+    <button id="calc_e">Find nice e</button>
+    <button id="default_e">65537</button><br />
+    d = e&#8315;&sup1; = <input name="d" id="d" /><br />
     <button id="calc_d">Calculate d</button><br />
-    <h2>4. Send your public key, store and keep secret your private key</h2>
+    <h2>4. Send your public key, store and keep your private key secret</h2>
     <button id="gen">Generate</button>
     <h3>Public key</h3>
     <pre id="pub"></pre>
@@ -69,8 +54,8 @@
     m = <input name="m" id="m" /><br />
     <br />
     <br />
-    <button id="encrypt">Encrypt/verify</button><br />
-    <button id="decrypt">Decrypt/sign</button><br /><br />
+    <button id="encrypt">Encrypt</button><button id="verify">Verify</button><br />
+    <button id="decrypt">Decrypt</button><button id="sign">Sign</button><br /><br />
     <h3>Cipher</h3>
     c = <input name="c" id="c" />
   </body>

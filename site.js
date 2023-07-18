@@ -1,24 +1,7 @@
 import {
-  randomNumber, randomPrime, bits, calculateK, utf2int, int2utf, isProbablyPrime, powmod
+  randomNumber, randomPrime, bits, utf2int, int2utf, isProbablyPrime, powmod, invmod
 } from "./rsa.js";
 var g = {};
-function getTXTFile(url) {
-  return new Promise((r) => {
-    let h = new XMLHttpRequest();
-    h.open('GET', url);
-    h.onreadystatechange = () => {
-      if (h.readyState === 4)
-        if (h.status === 200 || h.status == 0) {
-          r(h.responseText);
-        }
-    };
-    h.send(null);
-  });
-}
-var small_primes;
-getTXTFile('small-primes.txt').then((s) => {
-  small_primes = s.split(', ');
-});
 window.ginit = () => {
   [...document.querySelectorAll('*')]
     .filter((e) => e.id != '')
@@ -49,53 +32,18 @@ window.ginit = () => {
   const calc_phi = () => {
     g.phi.value = (BigInt(g.p.value) - 1n) * (BigInt(g.q.value) - 1n);
   };
-  const add_td = (tr, text) => {
-    let td = document.createElement('td');
-    td.innerText = text;
-    tr.appendChild(td);
-  };
-  const calc_k = () => {
-    let tbody = document.querySelectorAll('#k_table > tbody')[0];
-    tbody.innerHTML = '';
-    if (
-      (g.k.value = calculateK(g.phi.value, g.e.value, (k, f, m) => {
-        let tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        [k, f, m].forEach((e) => add_td(tr, e));
-      })) == null
-    )
-      g.k.value = 'gcd(\u03c6(n),e)\u22601';
-  };
   Array.prototype.min = function () {
     return this.reduce((b, e) => (b > e && e != null ? e : b));
   };
-  const calc_e = (_ = null, K = null) => {
-    if (small_primes === undefined)
-      g.e.value = 'primes not found (check your internet connection)';
-    let calc = small_primes.slice(0, (bits(g.n.value) * 6542) / 1024).reduce(
-      (b, e) => {
-        b[0]++;
-        if ((K == null && b[2] == 1) || (K != null && b[2] == K)) return b;
-        let k = calculateK(g.phi.value, e);
-        return (K == null ? b[2] > k : k == K) && k != null
-          ? [b[0], b[0], k, e]
-          : b;
-      },
-      [-1, null, Infinity, 'error']
-    );
-    if (g.e.value != 'error') g.k.value = calc[2];
-    g.e.value = calc[3];
+  const calc_e = async () => {
+    const mgn = Math.floor(bits(g.phi.value) / 2) + 1;
+    g.e.value = mgn < 16 && Math.random() * 7 < 1 && g.phi.value % 3 != 0 ? 3 : await randomPrime(Math.min(17, mgn));
   };
-  const hide_table = () => {
-    g.k_table.className = g.k_table.className ? '' : 'hidden';
-  };
-
+  const default_e = () => {
+    g.e.value = 0x1001;
+  }
   const calc_d = () => {
-    let ed = BigInt(g.k.value) * BigInt(g.phi.value) + 1n;
-    g.d.value =
-      ed % BigInt(g.e.value) == 0
-        ? ed / BigInt(g.e.value)
-        : '(k\u00d7\u03c6(n)+1)\u2224e';
+    g.d.value = invmod(g.e.value, g.phi.value);
   };
   const gen = () => {
     if (
@@ -127,6 +75,12 @@ window.ginit = () => {
   const decrypt = () => {
     g.m.value = powmod(g.c.value, g.d.value, g.n.value);
   };
+  const verify = () => {
+    g.m.value = powmod(g.c.value, g.e.value, g.n.value);
+  };
+  const sign = () => {
+    g.c.value = powmod(g.m.value, g.d.value, g.n.value);
+  };
 
   Object.entries({
     random: random,
@@ -136,16 +90,16 @@ window.ginit = () => {
     atoq: atoq,
     calc_n: calc_n,
     calc_phi: calc_phi,
-    calc_k: calc_k,
     calc_e: calc_e,
-    calc_e_k: () => calc_e(null, g.k.value),
-    hide_table: hide_table,
+    default_e: default_e,
     calc_d: calc_d,
     gen: gen,
     ttom: ttom,
     mtot: mtot,
     encrypt: encrypt,
     decrypt: decrypt,
+    verify: verify,
+    sign: sign,
   }).forEach((e) => {
     g[e[0]].onclick = e[1];
   });

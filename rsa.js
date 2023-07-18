@@ -5,6 +5,7 @@ const bits = (n) => BigInt(n).toString(2).length;
 const joinBytes = (bytes) => bytes.reduce((n, c, i) => n | BigInt(c) << BigInt(i) * 8n, 0n);
 const splitBigInt = (bigint) => {
   bigint = BigInt(bigint);
+  if(bigint == 0) return new Uint8Array();
   let result = new Uint8Array((bits(bigint) + 7) / 8);
   for (let i = 0; bigint > 0; ++i) {
     result[i] = Number(bigint & 0xFFn);
@@ -58,27 +59,18 @@ const invmod = (w, n) => {
     u = m;
     v = n;
   }
-  if (b !== 1n)
-    throw new RangeError(`${w} does not have inverse modulo ${n}`);
+  if (b !== 1n) {
+    console.error(`${w} does not have inverse modulo ${n}`);
+    return -1;
+  }
   x = x % n;
   if(x < 0n) x += n;
   return x;
 }
 
-const calculateK = (phi, e, cb = (_, __, ___) => null) => {
-  e = BigInt(e);
-  for (let k = 0, last = 0; k == 1 || last != 1; ++k) {
-    let full = BigInt(phi) * BigInt(k) + 1n;
-    last = full % e;
-    cb(k, full, last);
-    if (last == 0) return k;
-  }
-  return null;
-};
-
 const utf2int = (s) => joinBytes(new TextEncoder().encode(s));
 const int2utf = (i) => new TextDecoder().decode(splitBigInt(i));
 
 export {
-  randomNumber, randomPrime, bits, calculateK, utf2int, int2utf, isProbablyPrime, powmod
+  randomNumber, randomPrime, bits, utf2int, int2utf, isProbablyPrime, powmod, invmod
 };
