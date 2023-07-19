@@ -1,8 +1,24 @@
-const isProbablyPrime = (await import("https://cdn.jsdelivr.net/gh/juanelas/bigint-crypto-utils/dist/index.browser.esm.js")).isProbablyPrime;
-const bits = (n) => BigInt(n).toString(2).length;
-const bytes = (n) => (bits(n) + 7) / 8;
+import { isProbablyPrime } from "https://cdn.jsdelivr.net/gh/juanelas/bigint-crypto-utils/dist/index.browser.esm.js";
+export { isProbablyPrime };
 
-const setBigInt = (dataview, byteOffset, bigint, littleEndian) => {
+// #region integer
+/** @param {string|number|bigint} n */
+export const bits = (n) => BigInt(n).toString(2).length;
+
+/** @param {string|number|bigint} n */
+const bytes = (n) => (bits(n) + 7) / 8;
+// #endregion
+
+
+// #region bytes convertion
+/**
+ * like {@link DataView.setUint32} but with bigint and variable size
+ * @param {DataView} dataview
+ * @param {number} byteOffset
+ * @param {string|number|bigint} bigint non-negative
+ * @param {boolean} littleEndian
+*/
+function setBigInt(dataview, byteOffset, bigint, littleEndian) {
     bigint = BigInt(bigint);
     const size = bytes(bigint);
     for (let i = 0; bigint > 0; ++i) {
@@ -11,23 +27,44 @@ const setBigInt = (dataview, byteOffset, bigint, littleEndian) => {
     }
 }
 
-// assuming non-negative bigints and little-endian
+/** @param {UInt8Array} bytes little-endian bytes representation @returns {bigint} */
 const joinBytes = (bytes) => bytes.reduce((n, c, i) => n | BigInt(c) << BigInt(i) * 8n, 0n);
-const splitBigInt = (bigint) => {
+
+/**
+ * @param {string|number|bigint} bigint non-negative
+ * @returns minimal little-endian bytes representation
+ */
+function splitBigInt(bigint) {
     bigint = BigInt(bigint);
+
     if (bigint == 0) return new Uint8Array();
     let buffer = new ArrayBuffer(bytes(bigint));
-    setBigInt(buffer, 0, bigint, true);
+    setBigInt(new DataView(buffer), 0, bigint, true);
     return new Uint8Array(buffer);
 }
 
-// for(let i of [0, 1, 42, 0xFF, 0x100, 0xABCD])
-//   if(joinBytes(splitBigInt(i)) != i)
-//     throw new Error(`joinBytes(splitBigInt()) assertion failed: ${joinBytes(splitBigInt(i))} != ${i}`);
+for (let i of [0, 1, 42, 0xFF, 0x100, 0xABCD])
+    if (joinBytes(splitBigInt(i)) != i)
+        throw new Error(`joinBytes(splitBigInt()) assertion failed: ${joinBytes(splitBigInt(i))} != ${i}`);
 
-const randomBits = (bits) => joinBytes(crypto.getRandomValues(new Uint8Array((bits + 7) / 8))) % (1n << BigInt(bits));
-const randomNumber = (bits) => (1n << BigInt(bits - 1)) | randomBits(bits - 1);
-const randomPrime = async (bits) => {
+/** @param {Uint8Array|ArrayBuffer|Iterable<number>} data @returns lowercase hexadecimal representation */
+function hexify(data) {
+    return [...new Uint8Array(data)]
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('');
+}
+// #endregion
+
+
+// #region random
+/** @param {number} bits */
+const randomBits = (bits) => joinBytes(crypto.getRandomValues(new Uint8Array((bits + 7) / 8))) & ((1n << BigInt(bits)) - 1n);
+
+/** @param {number} bits */
+export const randomNumber = (bits) => (1n << BigInt(bits - 1)) | randomBits(bits - 1);
+
+/** @param {number} bits */
+export async function randomPrime(bits) {
     if (bits < 2) return -1n;
     if (bits == 2) return randomNumber(bits);
     let x;
@@ -36,8 +73,17 @@ const randomPrime = async (bits) => {
     while (!(await isProbablyPrime(x)));
     return x;
 };
+// #endregion
 
-const powmod = (base, exp, mod) => {
+
+// #region modular arithmetic
+/**
+ * @param {string|number|bigint} base
+ * @param {string|number|bigint} exp
+ * @param {string|number|bigint} mod
+ * @returns {bigint} `base`ᵉˣᵖ (mod `mod`)
+ */
+export function powmod(base, exp, mod) {
     base = BigInt(base), exp = BigInt(exp), mod = BigInt(mod);
     let x = base % mod, res = exp & 1n ? x : 1n;
     do {
@@ -47,8 +93,13 @@ const powmod = (base, exp, mod) => {
     return res;
 }
 
-const invmod = (w, n) => {
-    let a = BigInt(w), b = n = BigInt(n);
+/**
+ * @param {string|number|bigint} val
+ * @param {string|number|bigint} mod
+ * @returns `val`⁻¹ (mod `mod`) OR `-1n` when does not exist
+ */
+export function invmod(val, mod) {
+    let a = BigInt(val), b = mod = BigInt(mod);
     let x = 0n;
     let y = 1n;
     let u = 1n;
@@ -67,25 +118,33 @@ const invmod = (w, n) => {
         v = n;
     }
     if (b !== 1n) {
-        console.error(`${w} does not have inverse modulo ${n}`);
-        return -1;
+        console.error(`${val} does not have inverse modulo ${mod}`);
+        return -1n;
     }
-    x = x % n;
-    if (x < 0n) x += n;
+    x = x % mod;
+    if (x < 0n) x += mod;
     return x;
 }
+// #endregion
 
-const utf2int = (s) => joinBytes(new TextEncoder().encode(s));
-const int2utf = (i) => new TextDecoder().decode(splitBigInt(i));
 
-const epoch2date = (epoch) => new Date(1000 * epoch).toISOString().replace(/\.\d{3}Z/, 'Z')
-// if (epoch2date(60) != "1970-01-01T00:01:00Z") throw new Error();
+// #region text conversion
+/** @param {string} s string from which the little-endian representation will be returned */
+export const utf2int = (s) => joinBytes(new TextEncoder().encode(s));
 
-const hexify = (data) => [...new Uint8Array(data)]
-    .map(byte => byte.toString(16).padStart(2, '0'))
-    .join('');
+/** @param {number} i the little-endian representation of string which will be returned */
+export const int2utf = (i) => new TextDecoder().decode(splitBigInt(i));
 
+/** @param {number} epoch timestamap in seconds @returns ISO 8601 date string */
+export const epoch2date = (epoch) => new Date(1000 * epoch).toISOString().replace(/\.\d{3}Z/, 'Z')
+if (epoch2date(60) != "1970-01-01T00:01:00Z") throw new Error();
+// #endregion
+
+
+// #region RFC 4880 OpenPGP
+/** @param  {...Uint8Array|ArrayBuffer|Iterable<number>} l */
 function concatBytes(...l) {
+    l = l.map(e => new Uint8Array(e));
     const size = l.reduce((a, b) => a + b.length, 0);
     let c = new Uint8Array(size);
     let i = 0;
@@ -96,8 +155,8 @@ function concatBytes(...l) {
     return c;
 }
 
-
-const mpi = (bigint) => {
+/** @param {string|number|bigint} bigint number from which the [RFC4880] 3.2. Multiprecision Integers representation will be returned */
+function mpi(bigint) {
     const length = bits(bigint);
     const size = (length + 7) / 8;
     const buffer = new ArrayBuffer(2 + size);
@@ -106,24 +165,33 @@ const mpi = (bigint) => {
     setBigInt(dataview, 2, bigint, false);
     return buffer;
 }
-// if (hexify(mpi(511)).toUpperCase() != "000901FF") throw new Error();
 
-const genPGP = async (n, e, t) => {
-    const nb = new Uint8Array(mpi(n));
-    const ne = new Uint8Array(mpi(e));
-    const size = 6 + nb.length + ne.length;
+if (hexify(mpi(511)).toUpperCase() != "000901FF") throw new Error();
+
+/**
+ * @param {string|number|bigint} n
+ * @param {string|number|bigint} e
+ * @param {number} timestamp
+ * @returns A tuple consting of:
+ *  1. RFC 4880 OpenPGP V4 Fingerprint
+ *  2. base64 RFC 4880 OpenPGP public key
+ */
+export async function genPGP(n, e, timestamp) {
+    const nb = mpi(n);
+    const ne = mpi(e);
+    const size = 6 + nb.byteLength + ne.byteLength;
 
     // see RFC 4880: 12.2. Key IDs and Fingerprints
     const header = new DataView(new ArrayBuffer(9));
     header.setUint8(0, 0x99);
     header.setUint16(1, size, false);
     header.setUint8(3, 4);
-    header.setUint32(4, t, false);
+    header.setUint32(4, timestamp, false);
     header.setUint8(8, 1); // see 9.1. Public-Key Algorithms
 
     const bytes = concatBytes(
         // see 5.5.2.  Public-Key Packet Formats
-        new Uint8Array(header.buffer),
+        header.buffer,
         nb,
         ne
     )
@@ -131,6 +199,7 @@ const genPGP = async (n, e, t) => {
     const hash = hexify(await crypto.subtle.digest("SHA-1", bytes)).toUpperCase();
     const upper = hash.slice(0, 20);
     const lower = hash.slice(20, 40);
+    /** @param {string} s */
     const spread = (s) => [...Array(5).keys()].map(i => s.slice(4 * i, 4 * i + 4)).join(' ');
     const fingerprint = `${spread(upper)}  ${spread(lower)}`;
 
@@ -156,7 +225,4 @@ const genPGP = async (n, e, t) => {
 
     return [fingerprint, exported];
 }
-
-export {
-    randomNumber, randomPrime, bits, utf2int, int2utf, isProbablyPrime, powmod, invmod, epoch2date, genPGP
-};
+// #endregion

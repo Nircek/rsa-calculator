@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="site.js" type="module"></script>
+    <script src="rsa.js" type="module" async></script>
+    <script src="site.js" type="module" defer></script>
   </head>
-  <body onload="ginit()">
+  <body>
     <h1>RSA Calculator</h1>
     <h2>0. Generate prime numbers</h2>
     bits: <input name="bits" id="bits" value="16" /><br />
@@ -21,9 +22,9 @@
     <!-- <button id="gen_next_prime">Generate next random prime</button><br /> -->
     <h2>1. Pick p and q</h2>
     &#8473; &ni; p = <input name="p" id="p" /><br />
-    <button id="atop">a &rarr; p</button><br />
+    <button id="transfer_p">a &rarr; p</button><br />
     &#8473; &ni; q = <input name="q" id="q" /><br />
-    <button id="atoq">a &rarr; q</button><br />
+    <button id="transfer_q">a &rarr; q</button><br />
     <h2>2. Calculate n and &phi;(n)</h2>
     n = p &times; q = <input name="n" id="n" /><br />
     <button id="calc_n">Calculate n</button><br />
@@ -50,9 +51,9 @@
     <h3>Text</h3>
     <br />
     <textarea name="text" id="text" cols="30" rows="10"></textarea><br /><br />
-    <button id="ttom">Convert text to number</button><br />
+    <button id="calc_m">Convert text to number</button><br />
     Encoding: utf-8 &lt;-&gt; number<br />
-    <button id="mtot">Convert number to text</button><br /><br />
+    <button id="calc_t">Convert number to text</button><br /><br />
     <h3>Number</h3>
     <br />
     m = <input name="m" id="m" /><br />
