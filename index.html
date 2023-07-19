@@ -37,7 +37,11 @@
     d = e&#8315;&sup1; = <input name="d" id="d" /><br />
     <button id="calc_d">Calculate d</button><br />
     <h2>4. Send your public key, store and keep your private key secret</h2>
+    <input type="datetime-local" name="date" id="date" step="1" /> = <code id="isodate"></code><br />
+    Now: <input type="checkbox" title="now" name="now" id="now" checked /><br />
     <button id="gen">Generate</button>
+    <h3>Fingerprint</h3>
+    <pre id="fpr"></pre>
     <h3>Public key</h3>
     <pre id="pub"></pre>
     <h3>Private key</h3>
@@ -47,7 +51,7 @@
     <br />
     <textarea name="text" id="text" cols="30" rows="10"></textarea><br /><br />
     <button id="ttom">Convert text to number</button><br />
-    Encoding: utf-8 <-> number<br />
+    Encoding: utf-8 &lt;-&gt; number<br />
     <button id="mtot">Convert number to text</button><br /><br />
     <h3>Number</h3>
     <br />

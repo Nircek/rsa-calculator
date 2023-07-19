@@ -1,5 +1,5 @@
 import {
-  randomNumber, randomPrime, bits, utf2int, int2utf, isProbablyPrime, powmod, invmod
+  randomNumber, randomPrime, bits, utf2int, int2utf, isProbablyPrime, powmod, invmod, epoch2date, genPGP
 } from "./rsa.js";
 var g = {};
 window.ginit = () => {
@@ -8,6 +8,27 @@ window.ginit = () => {
     .forEach((e) => {
       g[e.id] = e;
     });
+
+  const updateTime = () => {
+    var now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    now.setMilliseconds(null)
+    g.date.value = now.toISOString().slice(0, -1);
+    g.date.dispatchEvent(new Event('change'));
+  }
+  const getTime = () => new Date(g.date.value) / 1000
+  g.date.addEventListener("change", () => {
+    g.isodate.innerText = epoch2date(getTime());
+  })
+  g.date.dispatchEvent(new Event('change'));
+  let updateTimeInterval = null;
+  g.now.addEventListener("change", () => {
+    g.date.readOnly = g.now.checked;
+    if (g.now.checked) updateTimeInterval = setInterval(updateTime, 1000);
+    else clearInterval(updateTimeInterval);
+    updateTime();
+  });
+  g.now.dispatchEvent(new Event('change'));
   const random = () => {
     g.number.value = randomNumber(g.bits.value);
   };
@@ -40,24 +61,27 @@ window.ginit = () => {
     g.e.value = mgn < 16 && Math.random() * 7 < 1 && g.phi.value % 3 != 0 ? 3 : await randomPrime(Math.min(17, mgn));
   };
   const default_e = () => {
-    g.e.value = 0x1001;
+    g.e.value = 0x10001;
   }
   const calc_d = () => {
     g.d.value = invmod(g.e.value, g.phi.value);
   };
-  const gen = () => {
+  const gen = async () => {
     if (
       powmod(100n, BigInt(g.e.value) * BigInt(g.d.value), BigInt(g.n.value)) == 100n
     ) {
-      g.pub.innerText = `RSA public key\nn=${g.n.value}\ne=${g.e.value}\n${bits(
+      const time = getTime();
+      const [pgpfpr, pgp] = await genPGP(g.n.value, g.e.value, time);
+      g.fpr.innerText = `RFC 4880 OpenPGP V4 Fingerprint:\n${pgpfpr}`;
+      g.pub.innerText = `RSA public key\nt=${epoch2date(time)}\nn=${g.n.value}\ne=${g.e.value}\n${bits(
         g.n.value
-      )} bits`;
+      )} bits\n\nbase64 RFC 4880 OpenPGP: ${pgp}`;
       g.sec.innerText = `RSA private key\nn=${g.n.value}\nd=${g.d.value}\n${bits(
         g.n.value
       )} bits`;
     }
     else {
-      g.sec.innerText = g.pub.innerText = 'e\u00d7d\u22621 \u2228 p\u2209\u2119 \u2228 q\u2209\u2119';
+      g.fpr.innerText = g.sec.innerText = g.pub.innerText = 'e\u00d7d\u22621 \u2228 p\u2209\u2119 \u2228 q\u2209\u2119';
     }
   };
 
