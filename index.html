@@ -10,6 +10,16 @@
   </head>
   <body>
     <h1>RSA Calculator</h1>
+    <div class="sticks">
+      <button id="tour">Yes.</button>
+      <button id="tour_continous" class="hidden">More.</button>
+      <span id="tour_stats" class="hidden">
+        This tour took <code id="last_tour_time"></code>.
+        (average of <code id="tour_number"></code> tour<span id="plural_tours" class="hidden">s</span>: <code id="tour_avg_time"></code>)
+        <span id="failed_stats" class="hidden"><code id="failed_number">0</code> FAILED</span>
+        <button id="tour_clear">Clear</button>
+      </span>
+    </div>
     <h2>0. Generate prime numbers</h2>
     bits: <input name="bits" id="bits" value="16" /><br />
     a = <input name="number" id="number" /><br />

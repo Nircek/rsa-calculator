@@ -12,6 +12,8 @@ import {
 } from "./rsa.js";
 
 const inputs = {
+    tour: document.getElementById("tour"),
+    tour_continous: document.getElementById("tour_continous"),
     bits: document.getElementById("bits"),
     number: document.getElementById("number"),
     p: document.getElementById("p"),
@@ -54,6 +56,103 @@ inputs.now.addEventListener("change", () => {
     updateTime();
 });
 
+function elapsedTime(elapsed) {
+    const ranges = {
+        h: 1000 * 3600,
+        min: 1000 * 60,
+        s: 1000,
+        ms: 1
+    };
+    let ret = [];
+    for (let key in ranges) {
+        let c = ranges[key] == 1 ? elapsed : Math.floor(elapsed / ranges[key]);
+        if (ranges[key] == 1) c = c.toFixed(3);
+        elapsed %= ranges[key];
+        if (c > 0)
+            ret.push(`${c} ${key}`);
+    }
+    return ret.length == 0 ? "0.000 ms" : ret.join(" ");
+}
+
+
+let tours = [];
+let tour_interval = null;
+let tour_cleared = false;
+
+inputs.tour_continous.addEventListener("click", () => {
+    if (tour_interval != null) {
+        clearInterval(tour_interval);
+        tour_interval = null;
+        inputs.tour_continous.innerText = "More.";
+        return;
+    }
+    tour_interval = setInterval(() => {
+        if (inputs.tour.disabled) return;
+        inputs.tour.click();
+    }, 200);
+    inputs.tour_continous.innerText = "Less.";
+});
+
+inputs.tour.addEventListener("click", async () => {
+    inputs.tour.disabled = true;
+    inputs.tour_continous.classList.remove("hidden");
+    tour_cleared = false;
+    const start = performance.now();
+    const tour_steps = [
+        "gen_prime",
+        "transfer_p",
+        "gen_prime_until",
+        "transfer_q",
+        "calc_n",
+        "calc_phi",
+        "calc_d",
+        "gen",
+    ];
+    for (let step of tour_steps) {
+        let failed;
+        do {
+            failed = false;
+            let wait = step.startsWith("gen_prime");
+            let promise = wait ? new Promise(resolve => {
+                const controller = new AbortController();
+                inputs.number.addEventListener("change", (e) => {
+                    if (e.isTrusted) return;
+                    controller.abort();
+                    resolve();
+                }, { signal: controller.signal });
+            }) : null;
+            document.getElementById(step == "gen_prime_until" ? "gen_prime" : step).click();
+            if (wait) await promise;
+            if (tour_cleared) {
+                inputs.tour.disabled = false;
+                return;
+            }
+            failed = step == "gen_prime_until" && inputs.number.value == inputs.p.value;
+        } while (failed);
+    }
+    const end = performance.now();
+    tours.push(end - start);
+    if (!last_key_test_status) {
+        document.getElementById("failed_stats").classList.remove("hidden");
+        document.getElementById("failed_number").innerText++;
+    }
+    document.getElementById("last_tour_time").innerText = elapsedTime(tours.slice(-1).pop());
+    document.getElementById("tour_number").innerText = tours.length;
+    document.getElementById("tour_avg_time").innerText = elapsedTime(tours.reduce((o, e) => o + e, 0) / tours.length);
+    if (tours.length > 1)
+        document.getElementById("plural_tours").classList.remove("hidden");
+    document.getElementById("tour_stats").classList.remove("hidden");
+    inputs.tour.disabled = false;
+});
+
+document.getElementById("tour_clear").addEventListener("click", async () => {
+    document.getElementById("tour_stats").classList.add("hidden");
+    tours = [];
+    tour_cleared = true;
+    document.getElementById("failed_stats").classList.add("hidden");
+    document.getElementById("failed_number").innerText = 0;
+});
+
 document.getElementById("random").addEventListener("click", () => {
     inputs.number.value = randomNumber(inputs.bits.value);
 });
@@ -67,6 +166,7 @@ document.getElementById("if_prime").addEventListener("click", async () => {
 
 document.getElementById("gen_prime").addEventListener("click", async () => {
     inputs.number.value = await randomPrime(inputs.bits.value);
+    inputs.number.dispatchEvent(new Event("change"));
 });
 
 document.getElementById("transfer_p").addEventListener("click", () => {
@@ -98,10 +198,11 @@ document.getElementById("calc_d").addEventListener("click", () => {
     inputs.d.value = invmod(inputs.e.value, inputs.phi.value);
 });
 
+let last_key_test_status = null;
 document.getElementById("gen").addEventListener("click", async () => {
     const time = getTime(), n = BigInt(inputs.n.value), e = BigInt(inputs.e.value), d = BigInt(inputs.d.value);
-    const t = randomNumber(bits(n)-1);
-    if (powmod(t, e * d, n) == t) {
+    const t = randomNumber(bits(n) - 1);
+    if (last_key_test_status = powmod(t, e * d, n) == t) {
         const [pgpfpr, pgp] = await genPGP(n, e, time);
         document.getElementById("fpr").innerText =
             `RFC 4880 OpenPGP V4 Fingerprint:\n${pgpfpr}`;

@@ -3,24 +3,20 @@ input,
 button, textarea {
   background-color: #aaa;
 }
+
 .hidden {
   display: none;
-}
-table {
-  border-bottom: 1px solid #000;
-  border-collapse: collapse;
-}
-table thead {
-  border: 1px solid #000;
-}
-table td,
-table th {
-  padding: 1em;
-  border-left: 1px solid #000;
-  border-right: 1px solid #000;
-  text-align: center;
 }
 
 pre {
   overflow-x: auto;
+}
+
+.sticks {
+  width: fit-content;
+  position: sticky;
+  top: 0;
+  border: medium solid black;
+  padding: 2px;
+  background-color: cornsilk;
 }
