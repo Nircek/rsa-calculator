@@ -3,13 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>RSA Calculator</title>
     <link rel="stylesheet" href="style.css" />
     <script src="rsa.js" type="module" async></script>
     <script src="site.js" type="module" defer></script>
   </head>
   <body>
     <h1>RSA Calculator</h1>
+    <div class="wasm" style="display: none;">
+      JS <input type="range" name="wasm" id="wasm" min="0" max="1" step="1" list="wasm-list" value ="0" /> WASM
+    </div>
+    <datalist id="wasm-list"><option value="0"></option><option value="1"></option></datalist>
     <div class="sticks">
       <button id="tour">Yes.</button>
       <button id="tour_continous" class="hidden">More.</button>
@@ -59,18 +63,15 @@
     <pre id="sec"></pre>
     <h2>5. Encrypt/decrypt your data</h2>
     <h3>Text</h3>
-    <br />
     <textarea name="text" id="text" cols="30" rows="10"></textarea><br /><br />
     <button id="calc_m">Convert text to number</button><br />
     Encoding: utf-8 &lt;-&gt; number<br />
     <button id="calc_t">Convert number to text</button><br /><br />
     <h3>Number</h3>
-    <br />
     m = <input name="m" id="m" /><br />
     <br />
-    <br />
     <button id="encrypt">Encrypt</button><button id="verify">Verify</button><br />
-    <button id="decrypt">Decrypt</button><button id="sign">Sign</button><br /><br />
+    <button id="decrypt">Decrypt</button><button id="sign">Sign</button><br />
     <h3>Cipher</h3>
     c = <input name="c" id="c" />
   </body>

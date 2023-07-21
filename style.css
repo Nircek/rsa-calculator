@@ -4,6 +4,14 @@ button, textarea {
   background-color: #aaa;
 }
 
+body {
+  line-height: 1.7em;
+}
+
+pre {
+  line-height: normal;
+}
+
 .hidden {
   display: none;
 }
@@ -12,11 +20,31 @@ pre {
   overflow-x: auto;
 }
 
-.sticks {
+input, button {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  border-color: grey;
+}
+
+.wasm, .sticks {
   width: fit-content;
-  position: sticky;
-  top: 0;
+  top: 1em;
   border: medium solid black;
-  padding: 2px;
+  padding: 3px;
   background-color: cornsilk;
+}
+
+.sticks {
+  position: sticky;
+}
+
+.wasm {
+  font-family: serif;
+  position: absolute;
+  right: 3em;
+  padding-bottom: 6px;
+}
+
+.wasm > input[type=range] {
+  width: 8ch;
+  vertical-align: bottom;
 }
