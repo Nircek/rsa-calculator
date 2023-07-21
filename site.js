@@ -8,7 +8,8 @@ import {
     utf2int,
     int2utf,
     epoch2date,
-    genPGP
+    genPGP,
+    genSSH,
 } from "./rsa.js";
 
 const inputs = {
@@ -27,26 +28,21 @@ const inputs = {
     text: document.getElementById("text"),
     m: document.getElementById("m"),
     c: document.getElementById("c"),
-}
-
-window.addEventListener("load", () => {
-    if (inputs.now.checked) inputs.now.dispatchEvent(new Event('change'));
-    inputs.date.dispatchEvent(new Event('change'));
-});
+};
 
 const updateTime = () => {
     var now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    now.setMilliseconds(null)
+    now.setMilliseconds(null);
     inputs.date.value = now.toISOString().slice(0, -1);
-    inputs.date.dispatchEvent(new Event('change'));
-}
+    inputs.date.dispatchEvent(new Event("change"));
+};
 
 const getTime = () => new Date(inputs.date.value) / 1000;
 
 inputs.date.addEventListener("change", () => {
     document.getElementById("isodate").innerText = epoch2date(getTime());
-})
+});
 
 let updateTimeInterval = null;
 inputs.now.addEventListener("change", () => {
@@ -56,26 +52,28 @@ inputs.now.addEventListener("change", () => {
     updateTime();
 });
 
+if (inputs.now.checked) inputs.now.dispatchEvent(new Event("change"));
+inputs.date.dispatchEvent(new Event("change"));
+
+/** @param {number} elapsed  */
 function elapsedTime(elapsed) {
     const ranges = {
         h: 1000 * 3600,
         min: 1000 * 60,
         s: 1000,
-        ms: 1
+        ms: 1,
     };
-    let ret = [];
+    const ret = [];
     for (let key in ranges) {
         let c = ranges[key] == 1 ? elapsed : Math.floor(elapsed / ranges[key]);
         if (ranges[key] == 1) c = c.toFixed(3);
         elapsed %= ranges[key];
-        if (c > 0)
-            ret.push(`${c} ${key}`);
+        if (c > 0) ret.push(`${c} ${key}`);
     }
     return ret.length == 0 ? "0.000 ms" : ret.join(" ");
 }
 
-
-let tours = [];
+const tours = [];
 let tour_interval = null;
 let tour_cleared = false;
 
@@ -108,19 +106,25 @@ inputs.tour.addEventListener("click", async () => {
         "calc_d",
         "gen",
     ];
-    for (let step of tour_steps) {
+    for (const step of tour_steps) {
         let failed;
         do {
             failed = false;
-            let wait = step.startsWith("gen_prime");
-            let promise = wait ? new Promise(resolve => {
-                const controller = new AbortController();
-                inputs.number.addEventListener("change", (e) => {
-                    if (e.isTrusted) return;
-                    controller.abort();
-                    resolve();
-                }, { signal: controller.signal });
-            }) : null;
+            const wait = step.startsWith("gen_prime");
+            const promise = wait
+                ? new Promise((resolve) => {
+                    const controller = new AbortController();
+                    inputs.number.addEventListener(
+                        "change",
+                        (e) => {
+                            if (e.isTrusted) return;
+                            controller.abort();
+                            resolve();
+                        },
+                        { signal: controller.signal },
+                    );
+                })
+                : null;
             document.getElementById(step == "gen_prime_until" ? "gen_prime" : step).click();
             if (wait) await promise;
             if (tour_cleared) {
@@ -147,7 +151,7 @@ inputs.tour.addEventListener("click", async () => {
 
 document.getElementById("tour_clear").addEventListener("click", async () => {
     document.getElementById("tour_stats").classList.add("hidden");
-    tours = [];
+    tours.length = 0;
     tour_cleared = true;
     document.getElementById("failed_stats").classList.add("hidden");
     document.getElementById("failed_number").innerText = 0;
@@ -158,10 +162,10 @@ document.getElementById("random").addEventListener("click", () => {
 });
 
 document.getElementById("if_prime").addEventListener("click", async () => {
-    let arr = [document.getElementById("number_prime"), document.getElementById("number_not_prime")];
+    const arr = [document.getElementById("number_prime"), document.getElementById("number_not_prime")];
     if (await isProbablyPrime(BigInt(inputs.number.value))) arr.reverse();
-    arr[0].classList.add('hidden');
-    arr[1].classList.remove('hidden');
+    arr[0].classList.add("hidden");
+    arr[1].classList.remove("hidden");
 });
 
 document.getElementById("gen_prime").addEventListener("click", async () => {
@@ -200,19 +204,25 @@ document.getElementById("calc_d").addEventListener("click", () => {
 
 let last_key_test_status = null;
 document.getElementById("gen").addEventListener("click", async () => {
-    const time = getTime(), n = BigInt(inputs.n.value), e = BigInt(inputs.e.value), d = BigInt(inputs.d.value);
+    const time = getTime();
+    const n = BigInt(inputs.n.value);
+    const e = BigInt(inputs.e.value);
+    const d = BigInt(inputs.d.value);
     const t = randomNumber(bits(n) - 1);
-    if (last_key_test_status = powmod(t, e * d, n) == t) {
-        const [pgpfpr, pgp] = await genPGP(n, e, time);
+    if ((last_key_test_status = powmod(t, e * d, n) == t)) {
+        const [pgp, pgpfpr] = await genPGP(n, e, time);
+        const [ssh, sshfprmd5, sshfprsha256, sshrandomart] = await genSSH(n, e);
+        // https://superuser.com/questions/22535/what-is-randomart-produced-by-ssh-keygen
         document.getElementById("fpr").innerText =
-            `RFC 4880 OpenPGP V4 Fingerprint:\n${pgpfpr}`;
+            `RFC 4880 OpenPGP V4 Fingerprint:\n${pgpfpr}\n\n${sshfprmd5}\n${sshfprsha256}\n\n${sshrandomart}\n\n`;
         document.getElementById("pub").innerText =
-            `RSA public key\nt=${epoch2date(time)}\nn=${n}\ne=${e}\n${bits(n)} bits\n\nbase64 RFC 4880 OpenPGP: ${pgp}`;
+            `RSA public key\nt=${epoch2date(time)}\nn=${n}\ne=${e}\n${bits(n)} bits\n\nbase64 RFC 4880 OpenPGP: ${pgp}\n\n${ssh}\n\n`;
+        // https://superuser.com/questions/1535116/generating-privatepublic-keypair-for-ssh-difference-between-ssh-keygen-and-ope?noredirect=1&lq=1
         document.getElementById("sec").innerText =
-            `RSA private key\nn=${n}\nd=${d}\n${bits(n)} bits`;
+            `RSA private key\nn=${n}\nd=${d}\n${bits(n)} bits\n\n`;
     } else {
         document.getElementById("fpr").innerText = document.getElementById("sec").innerText = document.getElementById("pub").innerText =
-            'e\u00d7d\u22621 \u2228 p\u2209\u2119 \u2228 q\u2209\u2119';
+            "e\u00d7d\u22621 \u2228 p\u2209\u2119 \u2228 q\u2209\u2119";
     }
 });
 
@@ -225,9 +235,10 @@ document.getElementById("calc_t").addEventListener("click", () => {
 });
 
 document.getElementById("encrypt").addEventListener("click", () => {
-    inputs.c.value = BigInt(inputs.m.value) < BigInt(inputs.n.value) ?
-        powmod(inputs.m.value, inputs.e.value, inputs.n.value) :
-        `m \u2265 n -- m > 2^${bits(inputs.m.value) - 1}`;
+    inputs.c.value =
+        BigInt(inputs.m.value) < BigInt(inputs.n.value)
+            ? powmod(inputs.m.value, inputs.e.value, inputs.n.value)
+            : `m \u2265 n -- m > 2^${bits(inputs.m.value) - 1}`;
 });
 
 document.getElementById("decrypt").addEventListener("click", () => {
