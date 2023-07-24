@@ -3,24 +3,48 @@ input,
 button, textarea {
   background-color: #aaa;
 }
+
+body {
+  line-height: 1.7em;
+}
+
+pre {
+  line-height: normal;
+}
+
 .hidden {
   display: none;
-}
-table {
-  border-bottom: 1px solid #000;
-  border-collapse: collapse;
-}
-table thead {
-  border: 1px solid #000;
-}
-table td,
-table th {
-  padding: 1em;
-  border-left: 1px solid #000;
-  border-right: 1px solid #000;
-  text-align: center;
 }
 
 pre {
   overflow-x: auto;
+}
+
+input, button {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  border-color: grey;
+}
+
+.wasm, .sticks {
+  width: fit-content;
+  top: 1em;
+  border: medium solid black;
+  padding: 3px;
+  background-color: cornsilk;
+}
+
+.sticks {
+  position: sticky;
+}
+
+.wasm {
+  font-family: serif;
+  position: absolute;
+  right: 3em;
+  padding-bottom: 6px;
+}
+
+.wasm > input[type=range] {
+  width: 8ch;
+  vertical-align: bottom;
 }
