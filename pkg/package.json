@@ -1,0 +1,17 @@
+{
+  "name": "rsa-calculator",
+  "collaborators": [
+    "Marcin Zepp <nircek-2103@protonmail.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "rsa_calculator_bg.wasm",
+    "rsa_calculator.js",
+    "rsa_calculator.d.ts"
+  ],
+  "module": "rsa_calculator.js",
+  "types": "rsa_calculator.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RSA Calculator</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="rsa.js" type="module" async></script>
+    <script src="site.js" type="module" defer></script>
+  </head>
+  <body>
+    <h1>RSA Calculator</h1>
+    <div class="wasm">
+      JS <input type="range" name="wasm" id="wasm" min="0" max="1" step="1" list="wasm-list" value ="0" />
+      <span id="wasm-state" title="NOT LOADED">WASM</span>
+    </div>
+    <datalist id="wasm-list"><option value="0"></option><option value="1"></option></datalist>
+    <div class="sticks">
+      <button id="tour">Yes.</button>
+      <button id="tour_continous" class="hidden">More.</button>
+      <span id="tour_stats" class="hidden">
+        This tour took <code id="last_tour_time"></code>.
+        (average of <code id="tour_number"></code> tour<span id="plural_tours" class="hidden">s</span>: <code id="tour_avg_time"></code>)
+        <span id="failed_stats" class="hidden"><code id="failed_number">0</code> FAILED</span>
+        <button id="tour_clear">Clear</button>
+      </span>
+    </div>
+    <h2>0. Generate prime numbers</h2>
+    bits: <input name="bits" id="bits" value="16" /><br />
+    a = <input name="number" id="number" /><br />
+    <button id="random">Generate random number</button><br />
+    <button id="if_prime">Check if it's prime</button>
+    <span id="number_prime" class="hidden">It is a prime number!</span>
+    <span id="number_not_prime" class="hidden">It is NOT a prime number!</span
+    ><br />
+    <button id="gen_prime">Generate random prime</button><br />
+    <!-- <button id="gen_next_prime">Generate next random prime</button><br /> -->
+    <h2>1. Pick p and q</h2>
+    &#8473; &ni; p = <input name="p" id="p" /><br />
+    <button id="transfer_p">a &rarr; p</button><br />
+    &#8473; &ni; q = <input name="q" id="q" /><br />
+    <button id="transfer_q">a &rarr; q</button><br />
+    <h2>2. Calculate n and &phi;(n)</h2>
+    n = p &times; q = <input name="n" id="n" /><br />
+    <button id="calc_n">Calculate n</button><br />
+    &phi;(n) = ( p - 1 ) ( q - 1 ) = <input name="phi" id="phi" /><br />
+    <button id="calc_phi">Calculate &phi;(n)</button><br />
+    <h2>3. Pick e and d</h2>
+    e = <input name="e" id="e" value="65537"/><br />
+    <!-- https://crypto.stackexchange.com/a/3113 -->
+    <button id="calc_e">Find nice e</button>
+    <button id="default_e">65537</button><br />
+    d = e&#8315;&sup1; = <input name="d" id="d" /><br />
+    <button id="calc_d">Calculate d</button><br />
+    <h2>4. Send your public key, store and keep your private key secret</h2>
+    <input type="datetime-local" name="date" id="date" step="1" /> = <code id="isodate"></code><br />
+    Now: <input type="checkbox" title="now" name="now" id="now" checked /><br />
+    <button id="gen">Generate</button>
+    <h3>Fingerprint</h3>
+    <pre id="fpr"></pre>
+    <h3>Public key</h3>
+    <pre id="pub"></pre>
+    <h3>Private key</h3>
+    <pre id="sec"></pre>
+    <h2>5. Encrypt/decrypt your data</h2>
+    <h3>Text</h3>
+    <textarea name="text" id="text" cols="30" rows="10"></textarea><br /><br />
+    <button id="calc_m">Convert text to number</button><br />
+    Encoding: utf-8 &lt;-&gt; number<br />
+    <button id="calc_t">Convert number to text</button><br /><br />
+    <h3>Number</h3>
+    m = <input name="m" id="m" /><br />
+    <br />
+    <button id="encrypt">Encrypt</button><button id="verify">Verify</button><br />
+    <button id="decrypt">Decrypt</button><button id="sign">Sign</button><br />
+    <h3>Cipher</h3>
+    c = <input name="c" id="c" />
+  </body>
+</html>

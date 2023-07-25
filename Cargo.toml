@@ -1,0 +1,30 @@
+[package]
+name = "rsa-calculator"
+version = "0.1.0"
+authors = ["Marcin Zepp <nircek-2103@protonmail.com>"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.87"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+once_cell = "1.18"
+num-bigint = { version = "0.4", features = ["rand"] }
+num-traits = "0.2"
+num-integer = "0.1"
+rand = "0.8"
+getrandom = { version = "0.2", features = ["js"] }
+miller_rabin = "1.1.1"
+primal = "0.3.2"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.37"
+
+[profile.release]
+opt-level = 3
+debug = true
