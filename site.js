@@ -28,6 +28,7 @@ const inputs = {
     text: document.getElementById("text"),
     m: document.getElementById("m"),
     c: document.getElementById("c"),
+    wasm: document.getElementById("wasm"),
 };
 
 const updateTime = () => {
@@ -169,7 +170,8 @@ document.getElementById("if_prime").addEventListener("click", async () => {
 });
 
 document.getElementById("gen_prime").addEventListener("click", async () => {
-    inputs.number.value = await randomPrime(inputs.bits.value);
+    const func = inputs.wasm.value == 0 ? randomPrime : window.wasm.generate_prime;
+    inputs.number.value = await func(inputs.bits.value);
     inputs.number.dispatchEvent(new Event("change"));
 });
 
@@ -251,4 +253,31 @@ document.getElementById("verify").addEventListener("click", () => {
 
 document.getElementById("sign").addEventListener("click", () => {
     inputs.c.value = powmod(inputs.m.value, inputs.d.value, inputs.n.value);
+});
+
+window.wasm = null;
+let firstWasmLoad = true;
+inputs.wasm.value = 0;
+inputs.wasm.addEventListener("change", async () => {
+    if (firstWasmLoad) {
+        firstWasmLoad = false;
+        const setWasmStateColor = (color) => {
+            document.getElementById("wasm-state").style.color = color;
+        };
+        document.getElementById("wasm-state").title = await (async () => {
+            try {
+                setWasmStateColor("white");
+                window.wasm = await import("./pkg/rsa_calculator.js");
+                setWasmStateColor("blue");
+                await window.wasm.default();
+                setWasmStateColor("yellow");
+                const state = window.wasm.state();
+                setWasmStateColor("green");
+                return state;
+            } catch (e) {
+                setWasmStateColor("red");
+                return `FAILED (${e})`;
+            }
+        })();
+    }
 });

@@ -10,8 +10,9 @@
   </head>
   <body>
     <h1>RSA Calculator</h1>
-    <div class="wasm" style="display: none;">
-      JS <input type="range" name="wasm" id="wasm" min="0" max="1" step="1" list="wasm-list" value ="0" /> WASM
+    <div class="wasm">
+      JS <input type="range" name="wasm" id="wasm" min="0" max="1" step="1" list="wasm-list" value ="0" />
+      <span id="wasm-state" title="NOT LOADED">WASM</span>
     </div>
     <datalist id="wasm-list"><option value="0"></option><option value="1"></option></datalist>
     <div class="sticks">
